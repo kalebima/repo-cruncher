@@ -3,6 +3,9 @@ from langchain.chat_models import ChatOpenAI
 from langchain.schema import ChatMessage
 import streamlit as st
 
+st.set_page_config(page_title="Crunchr", page_icon="⛩️")
+st.title("Your general-purpose knowledge cruncher 🎯")
+
 
 class StreamHandler(BaseCallbackHandler):
     def __init__(self, container, initial_text=""):
@@ -15,7 +18,12 @@ class StreamHandler(BaseCallbackHandler):
 
 
 with st.sidebar:
-    openai_api_key = st.text_input("OpenAI API Key", type="password")
+    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+
+if not openai_api_key:
+    st.info("Please add your OpenAI API key to continue.")
+    st.stop()
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [ChatMessage(role="assistant", content="How can I help you?")]
@@ -26,10 +34,6 @@ for msg in st.session_state.messages:
 if prompt := st.chat_input():
     st.session_state.messages.append(ChatMessage(role="user", content=prompt))
     st.chat_message("user").write(prompt)
-
-    if not openai_api_key:
-        st.info("Please add your OpenAI API key to continue.")
-        st.stop()
 
     with st.chat_message("assistant"):
         stream_handler = StreamHandler(st.empty())
