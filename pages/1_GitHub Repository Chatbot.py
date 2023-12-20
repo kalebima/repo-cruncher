@@ -16,12 +16,20 @@ st.title("Crunch through GitHub repos 👾")
 
 @st.cache_resource(ttl="1h")
 def configure_retriever(clone_url, openai_api_key):
-    loader = GitLoader(
-            clone_url=clone_url,
-            repo_path=f"./example_data/{clone_url.rstrip('/').split('/')[-1].replace('.git', '')}/",
-            branch="main",
-        )
-    data = loader.load()
+    try:
+        loader = GitLoader(
+                clone_url=clone_url,
+                repo_path=f"./example_data/{clone_url.rstrip('/').split('/')[-1].replace('.git', '')}/",
+                branch="main",
+            )
+        data = loader.load()
+    except Exception as e:
+        loader = GitLoader(
+                clone_url=clone_url,
+                repo_path=f"./example_data/{clone_url.rstrip('/').split('/')[-1].replace('.git', '')}/",
+                branch="master",
+            )
+        data = loader.load()
 
     # Create embeddings and store in vectordb
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
